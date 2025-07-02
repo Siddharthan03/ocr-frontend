@@ -11,8 +11,6 @@ const OCRUpload = () => {
   const [error, setError] = useState("");
   const [downloadReady, setDownloadReady] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL;
-
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files);
     if (selected.length > 10) {
@@ -86,8 +84,7 @@ const OCRUpload = () => {
       });
 
       const blob = new Blob([excelBuffer], {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
       });
 
       saveAs(blob, "metadata_output.xlsx");
