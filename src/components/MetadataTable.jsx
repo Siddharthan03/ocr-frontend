@@ -35,7 +35,13 @@ const MetadataTable = ({ metadata }) => {
         </thead>
         <tbody>
           {Object.entries(flatMetadata).map(([key, value], index) => {
-            const isSignature = key.toLowerCase().includes("signature") && typeof value === "string" && value.includes("/signatures/");
+            const isSignature =
+              (key.toLowerCase().includes("signature") ||
+               key === "Patient Signature" ||
+               key === "Physician Signature") &&
+              typeof value === "string" &&
+              value.includes("/signatures/");
+
             const imageUrl = `https://ocr-backend-production-cead.up.railway.app${value}`;
 
             return (
