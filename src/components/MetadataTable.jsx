@@ -3,8 +3,6 @@ import React from 'react';
 const MetadataTable = ({ metadata }) => {
   if (!metadata || Object.keys(metadata).length === 0) return null;
 
-  const apiBaseUrl = 'https://ocr-backend-production-cead.up.railway.app';
-
   const flattenObject = (obj, parentKey = '') => {
     return Object.entries(obj).reduce((acc, [key, value]) => {
       const fullKey = parentKey ? `${parentKey}.${key}` : key;
@@ -39,20 +37,7 @@ const MetadataTable = ({ metadata }) => {
           {Object.entries(flatMetadata).map(([key, value], index) => (
             <tr key={index} className="border-t hover:bg-gray-50">
               <td className="px-4 py-2 font-medium text-gray-800">{key}</td>
-              <td className="px-4 py-2 text-gray-700">
-                {(key === 'Patient Signature' || key === 'Physician Signature') &&
-                typeof value === 'string' &&
-                value.includes('/signatures/') ? (
-                  <img
-                    src={`${apiBaseUrl}${value}`}
-                    alt={key}
-                    className="max-w-xs border rounded p-1 bg-white"
-                    style={{ maxHeight: '100px' }}
-                  />
-                ) : (
-                  value || '-'
-                )}
-              </td>
+              <td className="px-4 py-2 text-gray-700">{value || '-'}</td>
             </tr>
           ))}
         </tbody>
