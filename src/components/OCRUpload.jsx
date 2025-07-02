@@ -37,7 +37,7 @@ const OCRUpload = () => {
         const formData = new FormData();
         formData.append('file', file);
 
-        const res = await axios.post(`${apiUrl}/api/ocr`, formData);
+        const res = await axios.post('https://ocr-backend-production-cead.up.railway.app/api/ocr', formData);
         const meta = res.data.metadata || {};
         meta['File Name'] = file.name;
         meta['Patient Signature'] = res.data.patient_signature;
