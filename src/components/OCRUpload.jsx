@@ -72,7 +72,7 @@ const OCRUpload = () => {
       padding: '2rem'
     }}>
       <h2 style={{ fontSize: '26px', marginBottom: '1rem' }}>
-        📄 Upload Up to 10 PDFs to Extract Metadata
+        📄 PDF OCR EXTRACTION TOOL
       </h2>
 
       <div style={{ marginBottom: '1.5rem' }}>
