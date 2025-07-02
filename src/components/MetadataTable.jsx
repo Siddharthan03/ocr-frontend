@@ -34,12 +34,34 @@ const MetadataTable = ({ metadata }) => {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(flatMetadata).map(([key, value], index) => (
-            <tr key={index} className="border-t hover:bg-gray-50">
-              <td className="px-4 py-2 font-medium text-gray-800">{key}</td>
-              <td className="px-4 py-2 text-gray-700">{value || '-'}</td>
-            </tr>
-          ))}
+          {Object.entries(flatMetadata).map(([key, value], index) => {
+            const isSignature = key.toLowerCase().includes("signature") && typeof value === "string" && value.includes("/signatures/");
+            const imageUrl = `https://ocr-backend-production-cead.up.railway.app${value}`;
+
+            return (
+              <tr key={index} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-2 font-medium text-gray-800">{key}</td>
+                <td className="px-4 py-2 text-gray-700">
+                  {isSignature ? (
+                    <img
+                      src={imageUrl}
+                      alt={key}
+                      style={{
+                        maxHeight: "100px",
+                        maxWidth: "300px",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        background: "#fff",
+                        padding: "4px"
+                      }}
+                    />
+                  ) : (
+                    value || "-"
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
