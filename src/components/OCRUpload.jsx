@@ -5,8 +5,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 const OCRUpload = () => {
-  const [file, setFile] = useState(null);
-  const [metadata, setMetadata] = useState({});
+  const [files, setFiles] = useState([]);
+  const [allMetadata, setAllMetadata] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [downloadReady, setDownloadReady] = useState(false);
@@ -14,34 +14,43 @@ const OCRUpload = () => {
   const apiUrl = process.env.REACT_APP_API_URL;
 
   const handleFileChange = (e) => {
-    const selected = e.target.files[0];
-    if (selected && selected.type === "application/pdf") {
-      setFile(selected);
-      setMetadata({});
-      setDownloadReady(false);
-      setError("");
-    } else {
-      setError("Please select a valid PDF file.");
-      setFile(null);
+    const selected = Array.from(e.target.files);
+    if (selected.length > 10) {
+      setError("⚠️ You can upload up to 10 PDF files only.");
+      return;
     }
+    setFiles(selected);
+    setAllMetadata([]);
+    setDownloadReady(false);
+    setError("");
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
+  const handleUploadAll = async () => {
+    if (!files || files.length === 0) return;
 
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post(`${apiUrl}/api/ocr`, formData);
-      const extracted = res.data.metadata || {};
-      setMetadata(extracted);
-      setDownloadReady(Object.keys(extracted).length > 0);
+      const all = [];
+
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await axios.post(`${apiUrl}/api/ocr`, formData);
+        const meta = res.data.metadata || {};
+        meta['File Name'] = file.name;
+        meta['Patient Signature'] = res.data.patient_signature;
+        meta['Physician Signature'] = res.data.physician_signature;
+
+        all.push(meta);
+      }
+
+      setAllMetadata(all);
+      setDownloadReady(true);
     } catch (err) {
+      console.error('Upload failed:', err);
       setError("OCR failed. Please check the backend logs.");
-      console.error("OCR failed", err);
     } finally {
       setLoading(false);
     }
@@ -65,13 +74,9 @@ const OCRUpload = () => {
         }, {});
       };
 
-      const flatMetadata = flattenObject(metadata);
-      const worksheetData = Object.entries(flatMetadata).map(([key, value]) => ({
-        Field: key,
-        Value: value,
-      }));
+      const excelRows = allMetadata.map((record) => flattenObject(record));
 
-      const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+      const worksheet = XLSX.utils.json_to_sheet(excelRows);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Metadata");
 
@@ -93,22 +98,50 @@ const OCRUpload = () => {
   };
 
   return (
-    <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
-      <h2>📄 PDF OCR Extraction Tool</h2>
-      <input type="file" accept=".pdf" onChange={handleFileChange} />
-      <button onClick={handleUpload} disabled={!file || loading} style={{ marginLeft: "1rem" }}>
-        {loading ? "Processing..." : "Upload"}
-      </button>
+    <div style={{ padding: "2rem", fontFamily: "Segoe UI, sans-serif", maxWidth: "1100px", margin: "0 auto" }}>
+      <h2 style={{ fontSize: '26px', marginBottom: '1rem' }}>
+        📄 Upload Up to 10 PDFs to Extract Metadata
+      </h2>
+
+      <div style={{ marginBottom: '1.5rem' }}>
+        <input type="file" accept=".pdf" multiple onChange={handleFileChange} />
+        <button onClick={handleUploadAll} disabled={loading} style={{
+          marginLeft: '1rem',
+          backgroundColor: '#007BFF',
+          color: '#fff',
+          padding: '0.6rem 1.2rem',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontWeight: 500
+        }}>
+          {loading ? "Processing..." : "Upload All"}
+        </button>
+      </div>
 
       {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
 
-      {!loading && Object.keys(metadata).length > 0 && (
-        <MetadataTable metadata={metadata} />
+      {!loading && allMetadata.length > 0 && (
+        <div style={{ marginTop: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', fontSize: '20px' }}>📋 Extracted Metadata</h3>
+          {allMetadata.map((meta, idx) => (
+            <MetadataTable key={idx} metadata={meta} />
+          ))}
+        </div>
       )}
 
       {downloadReady && (
-        <button onClick={handleDownloadExcel} style={{ marginTop: "1.5rem" }}>
-          📥 Download Excel
+        <button onClick={handleDownloadExcel} style={{
+          backgroundColor: '#28a745',
+          color: '#fff',
+          padding: '0.6rem 1.4rem',
+          border: 'none',
+          borderRadius: '5px',
+          marginTop: '1.5rem',
+          fontWeight: '500',
+          cursor: 'pointer'
+        }}>
+          ⬇️ Download Excel
         </button>
       )}
     </div>
