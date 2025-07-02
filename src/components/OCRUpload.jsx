@@ -144,7 +144,7 @@ const OCRUpload = () => {
                       <td style={{ border: '1px solid #ddd', padding: '8px' }}>
                         {(key === 'Patient Signature' || key === 'Physician Signature') && value?.includes('/signatures/')
                           ? <img
-                              src={`https://ocr-backend-production-cead.up.railway.app${value}`} ✅
+                              src={`${apiBaseUrl}${value}`}
                               alt={key}
                               style={{
                                 maxWidth: '260px',
