@@ -7,7 +7,7 @@ const OCRUpload = () => {
   const [loading, setLoading] = useState(false);
   const [downloadReady, setDownloadReady] = useState(false);
 
-  const apiBaseUrl = "https://ocr-backend-production-cead.up.railway.app";
+  const apiBaseUrl = "https://ocr-backend-production-3340.up.railway.app/";
 
   const handleFileChange = (e) => {
     const selected = Array.from(e.target.files);
